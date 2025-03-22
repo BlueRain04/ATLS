@@ -485,7 +485,7 @@ else:
            init_mode=DEFAULT_MODE, init_method=DEFAULT_METHOD):
         with tf.compat.v1.variable_scope(scope):
             #n_in = x.shape[1].value
-                    n_in = int(x.shape[1])
+            n_in = int(x.shape[1])
             w = tf.compat.v1.get_variable("w", [n_in, n_out],
                                 initializer=init_method(init_scale, init_mode))
             b = tf.compat.v1.get_variable("b", [n_out], initializer=tf.constant_initializer(0.0))
