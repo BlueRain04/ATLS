@@ -5,7 +5,9 @@ from resco_benchmark.config.signal_config import signal_configs
 from resco_benchmark.agents.agent import Agent
 
 try:
-    import tensorflow as tf
+    import tensorflow.compat.v1 as tf
+    tf.compat.v1.disable_eager_execution()
+
     from resco_benchmark.agents.ma2c import MA2CAgent
 except ImportError:
     tf = None
@@ -24,9 +26,9 @@ else:
             super().__init__()
             self.config = config
 
-            tf.reset_default_graph()
-            cfg_proto = tf.ConfigProto(allow_soft_placement=True)
-            self.sess = tf.Session(config=cfg_proto)
+            tf.compat.v1.reset_default_graph()
+            cfg_proto = tf.compat.v1.ConfigProto(allow_soft_placement=True)
+            self.sess = tf.compat.v1.Session(config=cfg_proto)
 
             self.signal_config = signal_configs[map_name]
             self.supervisors = config['mdp']['supervisors']  # reverse of management
@@ -70,8 +72,8 @@ else:
                     self.workers[worker_id] = MA2CAgent(config, observation_shape, num_actions, fp_size, waits_len,
                                                         worker_id + str(thread_number), self.sess)
 
-            self.saver = tf.train.Saver(max_to_keep=1)
-            self.sess.run(tf.global_variables_initializer())
+            self.saver = tf.compat.v1.train.Saver(max_to_keep=1)
+            self.sess.run(tf.compat.v1.global_variables_initializer())
 
         def fingerprints(self, observation):
             agent_fingerprint = {}
