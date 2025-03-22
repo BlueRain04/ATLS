@@ -1,4 +1,3 @@
-
 import numpy as np
 
 from resco_benchmark.agents.agent import Agent, IndependentAgent
@@ -6,7 +5,9 @@ from resco_benchmark.config.signal_config import signal_configs
 
 
 try:
-    import tensorflow as tf
+    import tensorflow.compat.v1 as tf
+    tf.compat.v1.disable_eager_execution()
+
 except ImportError:
     tf = None
     pass
@@ -27,9 +28,9 @@ else:
             self.signal_config = signal_configs[map_name]
 
             if sess is None:
-                tf.reset_default_graph()
-                cfg_proto = tf.ConfigProto(allow_soft_placement=True)
-                self.sess = tf.Session(config=cfg_proto)
+                tf.compat.v1.reset_default_graph()
+                cfg_proto = tf.compat.v1.ConfigProto(allow_soft_placement=True)
+                self.sess = tf.compat.v1.Session(config=cfg_proto)
 
             for key in obs_act:
                 obs_space = obs_act[key][0]
@@ -54,8 +55,8 @@ else:
                 self.agents[key] = MA2CAgent(config, obs_space, act_space, fp_size, waits_len, 'ma2c'+key + str(thread_number), self.sess)
 
             if sess is None:
-                self.saver = tf.train.Saver(max_to_keep=1)
-                self.sess.run(tf.global_variables_initializer())
+                self.saver = tf.compat.v1.train.Saver(max_to_keep=1)
+                self.sess.run(tf.compat.v1.global_variables_initializer())
             else:
                 self.saver = None
 
@@ -266,10 +267,10 @@ else:
         def _build_out_net(self, h, out_type):
             if out_type == 'pi':
                 pi = fc(h, out_type, self.n_a, act=tf.nn.softmax)
-                return tf.squeeze(pi)
+                return tf.compat.v1.squeeze(pi)
             else:
                 v = fc(h, out_type, 1, act=lambda x: x)
-                return tf.squeeze(v)
+                return tf.compat.v1.squeeze(v)
 
         def _get_forward_outs(self, out_type):
             outs = []
@@ -285,37 +286,37 @@ else:
             return out_values
 
         def prepare_loss(self, v_coef, max_grad_norm, alpha, epsilon):
-            self.A = tf.placeholder(tf.int32, [self.n_step])
-            self.ADV = tf.placeholder(tf.float32, [self.n_step])
-            self.R = tf.placeholder(tf.float32, [self.n_step])
-            self.entropy_coef = tf.placeholder(tf.float32, [])
-            A_sparse = tf.one_hot(self.A, self.n_a)
-            log_pi = tf.log(tf.clip_by_value(self.pi, 1e-10, 1.0))
-            entropy = -tf.reduce_sum(self.pi * log_pi, axis=1)
-            entropy_loss = -tf.reduce_mean(entropy) * self.entropy_coef
-            policy_loss = -tf.reduce_mean(tf.reduce_sum(log_pi * A_sparse, axis=1) * self.ADV)
-            value_loss = tf.reduce_mean(tf.square(self.R - self.v)) * 0.5 * v_coef
+            self.A = tf.compat.v1.placeholder(tf.int32, [self.n_step])
+            self.ADV = tf.compat.v1.placeholder(tf.float32, [self.n_step])
+            self.R = tf.compat.v1.placeholder(tf.float32, [self.n_step])
+            self.entropy_coef = tf.compat.v1.placeholder(tf.float32, [])
+            A_sparse = tf.compat.v1.one_hot(self.A, self.n_a)
+            log_pi = tf.compat.v1.log(tf.clip_by_value(self.pi, 1e-10, 1.0))
+            entropy = -tf.compat.v1.reduce_sum(self.pi * log_pi, axis=1)
+            entropy_loss = -tf.compat.v1.reduce_mean(entropy) * self.entropy_coef
+            policy_loss = -tf.compat.v1.reduce_mean(tf.compat.v1.reduce_sum(log_pi * A_sparse, axis=1) * self.ADV)
+            value_loss = tf.compat.v1.reduce_mean(tf.compat.v1.square(self.R - self.v)) * 0.5 * v_coef
             self.loss = policy_loss + value_loss + entropy_loss
 
-            wts = tf.trainable_variables(scope=self.name)
-            grads = tf.gradients(self.loss, wts)
+            wts = tf.compat.v1.trainable_variables(scope=self.name)
+            grads = tf.compat.v1.gradients(self.loss, wts)
             if max_grad_norm > 0:
-                grads, self.grad_norm = tf.clip_by_global_norm(grads, max_grad_norm)
-            self.lr = tf.placeholder(tf.float32, [])
-            self.optimizer = tf.train.RMSPropOptimizer(learning_rate=self.lr, decay=alpha,
+                grads, self.grad_norm = tf.compat.v1.clip_by_global_norm(grads, max_grad_norm)
+            self.lr = tf.compat.v1.placeholder(tf.compat.v1.float32, [])
+            self.optimizer = tf.compat.v1.train.RMSPropOptimizer(learning_rate=self.lr, decay=alpha,
                                                        epsilon=epsilon)
             self._train = self.optimizer.apply_gradients(list(zip(grads, wts)))
             # monitor training
             if self.name.endswith('_0a'):
                 summaries = []
-                # summaries.append(tf.summary.scalar('loss/%s_entropy_loss' % self.name, entropy_loss))
-                summaries.append(tf.summary.scalar('loss/%s_policy_loss' % self.name, policy_loss))
-                summaries.append(tf.summary.scalar('loss/%s_value_loss' % self.name, value_loss))
-                summaries.append(tf.summary.scalar('loss/%s_total_loss' % self.name, self.loss))
-                # summaries.append(tf.summary.scalar('train/%s_lr' % self.name, self.lr))
-                # summaries.append(tf.summary.scalar('train/%s_entropy_beta' % self.name, self.entropy_coef))
-                summaries.append(tf.summary.scalar('train/%s_gradnorm' % self.name, self.grad_norm))
-                self.summary = tf.summary.merge(summaries)
+                # summaries.append(tf.compat.v1.summary.scalar('loss/%s_entropy_loss' % self.name, entropy_loss))
+                summaries.append(tf.compat.v1.summary.scalar('loss/%s_policy_loss' % self.name, policy_loss))
+                summaries.append(tf.compat.v1.summary.scalar('loss/%s_value_loss' % self.name, value_loss))
+                summaries.append(tf.compat.v1.summary.scalar('loss/%s_total_loss' % self.name, self.loss))
+                # summaries.append(tf.compat.v1.summary.scalar('train/%s_lr' % self.name, self.lr))
+                # summaries.append(tf.compat.v1.summary.scalar('train/%s_entropy_beta' % self.name, self.entropy_coef))
+                summaries.append(tf.compat.v1.summary.scalar('train/%s_gradnorm' % self.name, self.grad_norm))
+                self.summary = tf.compat.v1.summary.merge(summaries)
 
 
     class LstmACPolicy(ACPolicy):
@@ -325,19 +326,19 @@ else:
             self.n_fc_wait = n_fc_wait
             self.n_fc_wave = n_fc_wave
             self.n_w = n_w
-            self.ob_fw = tf.placeholder(tf.float32, [1, n_s + n_w])     # forward 1-step
-            self.done_fw = tf.placeholder(tf.float32, [1])
-            self.ob_bw = tf.placeholder(tf.float32, [n_step, n_s + n_w])     # backward n-step
-            self.done_bw = tf.placeholder(tf.float32, [n_step])
-            self.states = tf.placeholder(tf.float32, [2, n_lstm * 2])
-            with tf.variable_scope(self.name):
+            self.ob_fw = tf.compat.v1.placeholder(tf.compat.v1.float32, [1, n_s + n_w])     # forward 1-step
+            self.done_fw = tf.compat.v1.placeholder(tf.compat.v1.float32, [1])
+            self.ob_bw = tf.compat.v1.placeholder(tf.compat.v1.float32, [n_step, n_s + n_w])     # backward n-step
+            self.done_bw = tf.compat.v1.placeholder(tf.compat.v1.float32, [n_step])
+            self.states = tf.compat.v1.placeholder(tf.compat.v1.float32, [2, n_lstm * 2])
+            with tf.compat.v1.variable_scope(self.name):
                 # pi and v use separate nets
                 self.pi_fw, pi_state = self._build_net('forward', 'pi')
                 self.v_fw, v_state = self._build_net('forward', 'v')
-                pi_state = tf.expand_dims(pi_state, 0)
-                v_state = tf.expand_dims(v_state, 0)
-                self.new_states = tf.concat([pi_state, v_state], 0)
-            with tf.variable_scope(self.name, reuse=True):
+                pi_state = tf.compat.v1.expand_dims(pi_state, 0)
+                v_state = tf.compat.v1.expand_dims(v_state, 0)
+                self.new_states = tf.compat.v1.concat([pi_state, v_state], 0)
+            with tf.compat.v1.variable_scope(self.name, reuse=True):
                 self.pi, _ = self._build_net('backward', 'pi')
                 self.v, _ = self._build_net('backward', 'v')
             self._reset()
@@ -358,7 +359,7 @@ else:
             else:
                 h0 = fc(ob[:, :self.n_s], out_type + '_fcw', self.n_fc_wave)
                 h1 = fc(ob[:, self.n_s:], out_type + '_fct', self.n_fc_wait)
-                h = tf.concat([h0, h1], 1)
+                h = tf.compat.v1.concat([h0, h1], 1)
             h, new_states = lstm(h, done, states, out_type + '_lstm')
             out_val = self._build_out_net(h, out_type)
             return out_val, new_states
@@ -417,19 +418,19 @@ else:
             self.n_fc_wait = n_fc_wait
             self.n_fc_fp = n_fc_fp
             self.n_w = n_w
-            self.ob_fw = tf.placeholder(tf.float32, [1, n_s + n_w + n_f])   # forward 1-step
-            self.done_fw = tf.placeholder(tf.float32, [1])
-            self.ob_bw = tf.placeholder(tf.float32, [n_step, n_s + n_w + n_f])  # backward n-step
-            self.done_bw = tf.placeholder(tf.float32, [n_step])
-            self.states = tf.placeholder(tf.float32, [2, n_lstm * 2])
-            with tf.variable_scope(self.name):
+            self.ob_fw = tf.compat.v1.placeholder(tf.compat.v1.float32, [1, n_s + n_w + n_f])   # forward 1-step
+            self.done_fw = tf.compat.v1.placeholder(tf.compat.v1.float32, [1])
+            self.ob_bw = tf.compat.v1.placeholder(tf.compat.v1.float32, [n_step, n_s + n_w + n_f])  # backward n-step
+            self.done_bw = tf.compat.v1.placeholder(tf.compat.v1.float32, [n_step])
+            self.states = tf.compat.v1.placeholder(tf.compat.v1.float32, [2, n_lstm * 2])
+            with tf.compat.v1.variable_scope(self.name):
                 # pi and v use separate nets
                 self.pi_fw, pi_state = self._build_net('forward', 'pi')
                 self.v_fw, v_state = self._build_net('forward', 'v')
-                pi_state = tf.expand_dims(pi_state, 0)
-                v_state = tf.expand_dims(v_state, 0)
-                self.new_states = tf.concat([pi_state, v_state], 0)
-            with tf.variable_scope(self.name, reuse=True):
+                pi_state = tf.compat.v1.expand_dims(pi_state, 0)
+                v_state = tf.compat.v1.expand_dims(v_state, 0)
+                self.new_states = tf.compat.v1.concat([pi_state, v_state], 0)
+            with tf.compat.v1.variable_scope(self.name, reuse=True):
                 self.pi, _ = self._build_net('backward', 'pi')
                 self.v, _ = self._build_net('backward', 'v')
             self._reset()
@@ -448,10 +449,10 @@ else:
             h0 = fc(ob[:, :self.n_s], out_type + '_fcw', self.n_fc_wave)
             h1 = fc(ob[:, (self.n_s + self.n_w):], out_type + '_fcf', self.n_fc_fp)
             if self.n_w == 0:
-                h = tf.concat([h0, h1], 1)
+                h = tf.compat.v1.concat([h0, h1], 1)
             else:
                 h2 = fc(ob[:, self.n_s: (self.n_s + self.n_w)], out_type + '_fct', self.n_fc_wait)
-                h = tf.concat([h0, h1, h2], 1)
+                h = tf.compat.v1.concat([h0, h1, h2], 1)
             h, new_states = lstm(h, done, states, out_type + '_lstm')
             out_val = self._build_out_net(h, out_type)
             return out_val, new_states
@@ -482,24 +483,26 @@ else:
 
     def fc(x, scope, n_out, act=tf.nn.relu, init_scale=DEFAULT_SCALE,
            init_mode=DEFAULT_MODE, init_method=DEFAULT_METHOD):
-        with tf.variable_scope(scope):
-            n_in = x.shape[1].value
-            w = tf.get_variable("w", [n_in, n_out],
+        with tf.compat.v1.variable_scope(scope):
+            #n_in = x.shape[1].value
+                    n_in = int(x.shape[1])
+            w = tf.compat.v1.get_variable("w", [n_in, n_out],
                                 initializer=init_method(init_scale, init_mode))
-            b = tf.get_variable("b", [n_out], initializer=tf.constant_initializer(0.0))
-            z = tf.matmul(x, w) + b
+            b = tf.compat.v1.get_variable("b", [n_out], initializer=tf.constant_initializer(0.0))
+            z = tf.compat.v1.matmul(x, w) + b
             return act(z)
 
 
     def batch_to_seq(x):
         n_step = x.shape[0].value
         if len(x.shape) == 1:
-            x = tf.expand_dims(x, -1)
-        return tf.split(axis=0, num_or_size_splits=n_step, value=x)
+            x = tf.compat.v1.expand_dims(x, -1)
+        return tf.compat.v1.split(x, num_or_size_splits=n_step, axis=0)
+
 
 
     def seq_to_batch(x):
-        return tf.concat(axis=0, values=x)
+        return tf.concat(x, axis=0)
 
 
     def lstm(xs, dones, s, scope, init_scale=DEFAULT_SCALE, init_mode=DEFAULT_MODE,
@@ -509,28 +512,28 @@ else:
         dones = batch_to_seq(dones)
         n_in = xs[0].shape[1].value
         n_out = s.shape[0] // 2
-        with tf.variable_scope(scope):
-            wx = tf.get_variable("wx", [n_in, n_out*4],
+        with tf.compat.v1.variable_scope(scope):
+            wx = tf.compat.v1.get_variable("wx", [n_in, n_out*4],
                                  initializer=init_method(init_scale, init_mode))
-            wh = tf.get_variable("wh", [n_out, n_out*4],
+            wh = tf.compat.v1.get_variable("wh", [n_out, n_out*4],
                                  initializer=init_method(init_scale, init_mode))
-            b = tf.get_variable("b", [n_out*4], initializer=tf.constant_initializer(0.0))
-        s = tf.expand_dims(s, 0)
-        c, h = tf.split(axis=1, num_or_size_splits=2, value=s)
+            b = tf.compat.v1.get_variable("b", [n_out*4], initializer=tf.constant_initializer(0.0))
+        s = tf.compat.v1.expand_dims(s, 0)
+        c, h = tf.compat.v1.split(axis=1, num_or_size_splits=2, value=s)
         for ind, (x, done) in enumerate(zip(xs, dones)):
             c = c * (1-done)
             h = h * (1-done)
-            z = tf.matmul(x, wx) + tf.matmul(h, wh) + b
-            i, f, o, u = tf.split(axis=1, num_or_size_splits=4, value=z)
-            i = tf.nn.sigmoid(i)
-            f = tf.nn.sigmoid(f)
-            o = tf.nn.sigmoid(o)
-            u = tf.tanh(u)
+            z = tf.compat.v1.matmul(x, wx) + tf.matmul(h, wh) + b
+            i, f, o, u = tf.compat.v1.split(axis=1, num_or_size_splits=4, value=z)
+            i = tf.compat.v1.nn.sigmoid(i)
+            f = tf.compat.v1.nn.sigmoid(f)
+            o = tf.compat.v1.nn.sigmoid(o)
+            u = tf.compat.v1.tanh(u)
             c = f*c + i*u
-            h = o*tf.tanh(c)
+            h = o*tf.compat.v1.tanh(c)
             xs[ind] = h
-        s = tf.concat(axis=1, values=[c, h])
-        return seq_to_batch(xs), tf.squeeze(s)
+        s = tf.compat.v1.concat(axis=1, values=[c, h])
+        return seq_to_batch(xs), tf.compat.v1.squeeze(s)
 
 
     class Scheduler:
