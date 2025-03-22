@@ -494,7 +494,7 @@ else:
 
 
     def batch_to_seq(x):
-        n_step = x.shape[0].value
+        n_step = x.shape[0]
         if len(x.shape) == 1:
             x = tf.compat.v1.expand_dims(x, -1)
         return tf.compat.v1.split(x, num_or_size_splits=n_step, axis=0)
