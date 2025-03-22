@@ -510,7 +510,7 @@ else:
         xs = batch_to_seq(xs)
         # need dones to reset states
         dones = batch_to_seq(dones)
-        n_in = xs[0].shape[1].value
+        n_in = xs[0].shape[1]
         n_out = s.shape[0] // 2
         with tf.compat.v1.variable_scope(scope):
             wx = tf.compat.v1.get_variable("wx", [n_in, n_out*4],
