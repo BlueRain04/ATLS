@@ -25,7 +25,7 @@ def main():
                              ])
     ap.add_argument("--pwd", type=str, default=os.path.dirname(__file__))
     ap.add_argument("--log_dir", type=str, default=os.path.join(os.path.dirname(os.getcwd()), 'results' + os.sep))
-    ap.add_argument("--gui", type=bool, default=True)
+    ap.add_argument("--gui", type=bool, default=False)
     ap.add_argument("--libsumo", type=bool, default=False)
     ap.add_argument("--tr", type=int, default=0)  # Can't multi-thread with libsumo, provide a trial number
     ap.add_argument("--save_freq", type=int, default=100)
@@ -35,6 +35,7 @@ def main():
         os.environ["LIBSUMO_AS_TRACI"] = "1"  # Set LIBSUMO_AS_TRACI to a non-empty value
     if args.libsumo and 'LIBSUMO_AS_TRACI' not in os.environ:
         raise EnvironmentError("Set LIBSUMO_AS_TRACI to nonempty value to enable libsumo")
+        
     if args.procs == 1 or args.libsumo:
         run_trial(args, args.tr)
     else:
