@@ -29,15 +29,17 @@ class MultiSignal(gym.Env):
         self.connection_name = run_name + '-' + map_name + '---' + state_fn.__name__ + '-' + reward_fn.__name__
         self.map_name = map_name
 
-        # Run some steps in the simulation with default light configurations to detect phases
+        binary = sumolib.checkBinary("sumo-gui" if self.gui else "sumo")
+
         if self.route is not None:
             if 'grid4x4' in self.route:
                 self.route += '/grid4x4'
             elif 'arterial4x4' in self.route:
                 self.route += '/arterial4x4'
-            sumo_cmd = [sumolib.checkBinary('sumo'), '-n', net, '-r', self.route + '_1.rou.xml', '--no-warnings', 'True']
+            sumo_cmd = [binary, '-n', net, '-r', self.route + '_1.rou.xml', '--no-warnings', 'True']
         else:
-            sumo_cmd = [sumolib.checkBinary('sumo'), '-c', net, '--no-warnings', 'True']
+            sumo_cmd = [binary, '-c', net, '--no-warnings', 'True']
+
         print('[DEBUG]:', sumo_cmd)
         if self.libsumo:
             traci.start(sumo_cmd)
@@ -45,27 +47,23 @@ class MultiSignal(gym.Env):
         else:
             traci.start(sumo_cmd, label = self.connection_name)
             self.sumo = traci.getConnection(self.connection_name)
+
         self.signal_ids = self.sumo.trafficlight.getIDList()
         print("lights", len(self.signal_ids), self.signal_ids)
 
-        # this should work on all SUMO versions
         self.phases = {
             lightID: [
-                p
-                for p in self.sumo.trafficlight.getAllProgramLogics(lightID)[0].getPhases()
+                p for p in self.sumo.trafficlight.getAllProgramLogics(lightID)[0].getPhases()
                 if "y" not in p.state and "g" in p.state.lower()
             ]
             for lightID in self.signal_ids
         }
 
-
         self.signals = dict()
-
         self.all_ts_ids = lights if len(lights) > 0 else self.sumo.trafficlight.getIDList()
         self.ts_starter = len(self.all_ts_ids)
         self.signal_ids = []
 
-        # Pull signal observation shapes
         self.obs_shape = dict()
         self.observation_space = list()
         self.action_space = list()
@@ -82,20 +80,21 @@ class MultiSignal(gym.Env):
             o_shape = gym.spaces.Box(low=-np.inf, high=np.inf, shape=o_shape)
             self.ts_order.append(ts)
             self.observation_space.append(o_shape)
-            if ts == 'top_mgr' or ts == 'bot_mgr': continue  # Not a traffic signal
+            if ts == 'top_mgr' or ts == 'bot_mgr': continue
             self.action_space.append(gym.spaces.Discrete(len(self.phases[ts])))
 
         self.n_agents = self.ts_starter
-
         self.run = 0
         self.metrics = []
         self.wait_metric = dict()
 
-        if not self.libsumo: traci.switch(self.connection_name)
+        if not self.libsumo:
+            traci.switch(self.connection_name)
         traci.close()
+
         self.connection_name = run_name + '-' + map_name + '-' + str(len(lights)) + '-' + state_fn.__name__ + '-' + reward_fn.__name__
-        if not os.path.exists(log_dir+self.connection_name):
-            os.makedirs(log_dir+self.connection_name)
+        if not os.path.exists(log_dir + self.connection_name):
+            os.makedirs(log_dir + self.connection_name)
         self.sumo_cmd = None
         print('Connection ID', self.connection_name)
 
