@@ -126,9 +126,11 @@ class MultiSignal(gym.Env):
         self.sumo_cmd += ['--random', '--time-to-teleport', '-1', '--tripinfo-output',
                           os.path.join(self.log_dir, self.connection_name, 'tripinfo_' + str(self.run) + '.xml'),
                           '--tripinfo-output.write-unfinished',
-                          '--no-step-log', 'True',
+                          '--no-step-log',
                           '--no-warnings', 'True']
         if self.libsumo:
+            if traci.isLoaded():
+                traci.close()
             traci.start(self.sumo_cmd)
             self.sumo = traci
         else:
