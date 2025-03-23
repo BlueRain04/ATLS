@@ -35,8 +35,8 @@ def main():
     print(f"GUI Mode: {args.gui}")
     print(f"Using libsumo: {args.libsumo}")
     
-    if args.libsumo:
-        os.environ["LIBSUMO_AS_TRACI"] = "1"  # Set LIBSUMO_AS_TRACI to a non-empty value
+   # if args.libsumo:
+    #    os.environ["LIBSUMO_AS_TRACI"] = "1"  # Set LIBSUMO_AS_TRACI to a non-empty value
     if args.libsumo and 'LIBSUMO_AS_TRACI' not in os.environ:
         raise EnvironmentError("Set LIBSUMO_AS_TRACI to nonempty value to enable libsumo")
         
