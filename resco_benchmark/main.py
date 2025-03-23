@@ -18,7 +18,7 @@ def main():
                              'MPLightFULL', 'FMA2CFull', 'FMA2CVAL'])
     ap.add_argument("--trials", type=int, default=5)
     ap.add_argument("--eps", type=int, default=10)
-    ap.add_argument("--procs", type=int, default=1)
+    ap.add_argument("--procs", type=int, default=2)
     ap.add_argument("--map", type=str, default='ingolstadt1',
                     choices=['grid4x4', 'arterial4x4', 'ingolstadt1', 'ingolstadt7', 'ingolstadt21',
                              'cologne1', 'cologne3', 'cologne8',
