@@ -226,7 +226,7 @@ else:
                 rewards = np.clip(rewards, -self.reward_clip, self.reward_clip)
             self.trans_buffer.add_transition(obs, actions, rewards, values, done)
 
-        """def load(self, model_dir, checkpoint=None):
+        def load(self, model_dir, checkpoint=None):
             save_file = None
             save_step = 0
             if os.path.exists(model_dir):
@@ -248,7 +248,7 @@ else:
                 logging.info('Checkpoint loaded: %s' % save_file)
                 return True
             logging.error('Can not find old checkpoint for %s' % model_dir)
-            return False"""
+            return False
 
 
     class ACPolicy:
