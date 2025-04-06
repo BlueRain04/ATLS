@@ -82,8 +82,8 @@ def run_trial(args, trial):
     route = map_config['route']
     if route is not None: route = os.path.join(args.pwd, route)
     if args.map == 'grid4x4' or args.map == 'arterial4x4':
-        if not os.path.exists(route): raise EnvironmentError("You must decompress environment files defining traffic flow")
-
+        if route is not None and not os.path.exists(route): raise EnvironmentError("You must decompress environment files defining traffic flow") #CHANGED THIS
+            
     env = MultiSignal(alg.__name__+'-tr'+str(trial),
                       args.map,
                       os.path.join(args.pwd, map_config['net']),
