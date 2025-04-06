@@ -445,6 +445,33 @@ mdp_configs = {
             'norm_wave': 5.0,
             'norm_wait': 100.0,
             'alpha': 0.75,
+        },
+        'ingolstadt1': {
+            'coef': 0.4,
+            'coop_gamma': 0.9,
+            'clip_wave': 4.0,
+            'clip_wait': 4.0,
+            'norm_wave': 5.0,
+            'norm_wait': 100.0,
+            'alpha': 0.75,
+        },
+        'cologne1': {
+            'coef': 0.4,
+            'coop_gamma': 0.9,
+            'clip_wave': 4.0,
+            'clip_wait': 4.0,
+            'norm_wave': 5.0,
+            'norm_wait': 100.0,
+            'alpha': 0.75,
+        },
+        'cologne3': {
+            'coef': 0.4,
+            'coop_gamma': 0.9,
+            'clip_wave': 4.0,
+            'clip_wait': 4.0,
+            'norm_wave': 5.0,
+            'norm_wait': 100.0,
+            'alpha': 0.75,
         }
     }
 }
