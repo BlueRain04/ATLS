@@ -3,7 +3,7 @@ import os
 import multiprocessing as mp
 import importlib
 
-from multi_signal import MultiSignal
+from resco_benchmark.multi_signal import MultiSignal
 import argparse
 from resco_benchmark.config.agent_config import agent_configs
 from resco_benchmark.config.map_config import map_configs
