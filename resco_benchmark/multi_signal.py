@@ -123,11 +123,13 @@ class MultiSignal(gym.Env):
             self.sumo_cmd += ['-n', self.net, '-r', self.route + '_'+str(self.run)+'.rou.xml']
         else:
             self.sumo_cmd += ['-c', self.net]
-        self.sumo_cmd += ['--random', '--time-to-teleport', '-1', '--tripinfo-output',
-                          os.path.join(self.log_dir, self.connection_name, 'tripinfo_' + str(self.run) + '.xml'),
-                          '--tripinfo-output.write-unfinished',
-                          '--no-step-log',
-                          '--no-warnings', 'True']
+        self.sumo_cmd += ['--random', '--time-to-teleport', '-1',
+                  '--tripinfo-output', os.path.join(self.log_dir, self.connection_name, 'tripinfo_' + str(self.run) + '.xml'),
+                  '--tripinfo-output.write-unfinished',
+                  '--fcd-output', os.path.join(self.log_dir, self.connection_name, 'fcd_output_' + str(self.run) + '.xml'),
+                  '--no-step-log',
+                  '--no-warnings', 'True']
+
         if self.libsumo:
             if traci.isLoaded():
                 traci.close()
