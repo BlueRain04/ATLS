@@ -7,7 +7,4 @@
     <begin value="57600"/>
     <end value="61200"/>
   </time>
-  <output>
-    <fcd-output value="fcd_output.xml"/>
-  </output>
 </configuration>
