@@ -227,7 +227,10 @@ class MultiSignal(gym.Env):
                 for metric in ['step', 'reward', 'max_queues', 'queue_lengths']:
                     csv_line = csv_line + str(line[metric]) + ', '
                 output_file.write(csv_line + '\n')
-
+                
+        state_path = os.path.join(self.log_dir, self.connection_name, 'state_' + str(self.run) + '.xml')  #here change
+        self.sumo.simulation.saveState(state_path)
+        
     def render(self, mode='human'):
         pass
 
