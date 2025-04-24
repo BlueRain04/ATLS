@@ -9,6 +9,5 @@
   </time>
   <output>
     <fcd-output value="fcd_output.xml"/>
-    <save-state.files value="state_1.xml"/>
   </output>
 </configuration>
