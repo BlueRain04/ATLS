@@ -102,6 +102,17 @@ map_configs = {
         'end_time': 28800,
         'warmup': 0
     },
+    'ksu_map': {
+        'lights': [],
+        'net': 'environments/ksu_map/ksu.net.xml',
+        'route': 'environments/ksu_map/ksu.rou.xml',
+        'step_length': 10,
+        'yellow_length': 3,
+        'step_ratio': 1,
+        'start_time': 0,
+        'end_time': 3600,
+        'warmup': 0
+    },
     'turin5': {
         'lights': [],
         'net': 'environments/turin5/turin5.sumocfg',
