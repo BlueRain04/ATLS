@@ -535,7 +535,7 @@ mdp_configs = {
             'norm_wave': 5.0,
             'norm_wait': 100.0,
             'alpha': 0.75,
-        }
+        },
         'ksu_map': {
             'coef': 0.4,
             'coop_gamma': 0.9,
