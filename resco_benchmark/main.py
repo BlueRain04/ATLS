@@ -21,7 +21,7 @@ def main():
     ap.add_argument("--procs", type=int, default=2)
     ap.add_argument("--map", type=str, default='ingolstadt1',
                     choices=['grid4x4', 'arterial4x4', 'ingolstadt1', 'ingolstadt7', 'ingolstadt21',
-                             'cologne1', 'cologne3', 'cologne8',
+                             'cologne1', 'cologne3', 'cologne8','ksu_map',
                              ])
     ap.add_argument("--pwd", type=str, default=os.path.dirname(__file__))
     ap.add_argument("--log_dir", type=str, default=os.path.join(os.path.dirname(os.getcwd()), 'results' + os.sep))
