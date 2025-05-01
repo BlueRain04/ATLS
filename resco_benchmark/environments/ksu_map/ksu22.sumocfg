@@ -1,7 +1,7 @@
 <configuration>
     <input>
-        <net-file value="ksu.net.xml"/>
-        <route-files value="ksu.rou.xml"/>
+        <net-file value="ksu22.net.xml"/>
+        <route-files value="ksu22.rou.xml"/>
     </input>
     <time>
         <begin value="0"/>
